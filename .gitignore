@@ -1,2 +1,35 @@
 /mlh
-.env
+# Python-specific ignores
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+env/
+venv/
+ENV/
+.env.local
+.venv
+backend/venv/
+
+# Flask specific (if using instance folder)
+instance/
+.webassets-cache
+
+# VS Code / PyCharm
+.vscode/
+.idea/
+
+# Node / Frontend-specific ignores
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+build/
+
+# OS-specific
+.DS_Store
+Thumbs.db
