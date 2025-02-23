@@ -70,7 +70,7 @@ def main():
     
     csv_filename = r'D:\YogiSync\data\dataset\landmarks.csv'
     # Change class_name as needed for each pose (e.g., "warrior_pose", "tree_pose", etc.)
-    class_name = "Tree Pose"
+    class_name = "Triangle Pose"
     num_pose_landmarks = 33
     include_face_landmarks = False  # Set True if you want to log face landmarks too.
     
