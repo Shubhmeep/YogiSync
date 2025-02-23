@@ -601,7 +601,7 @@ def api_chat():
         "You are a professional and emotionally intelligent yoga instructor. Please ensure that your responses are concise, helpful, and visually neat.\n\n"
         "Guidelines:\n"
         "1. If the user greets you (e.g., 'hi', 'hello', 'hey'), respond with a brief greeting.\n\n"
-        "2. If the user describes a body issue or problem, choose exactly one pose from this approved list: Warrior Pose, Raised Hands Pose.\n"
+        "2. If the user describes a body issue or problem, choose exactly one pose from this approved list that would help them: Warrior Pose, Raised Hands Pose, Triangle Pose, Tree Pose, Pank Pose and Chair pose.\n"
         "   • Present the pose name in **bold** (e.g., **Warrior Pose**).\n"
         "   • Provide a single short sentence explaining why it helps.\n"
         "   • Then recommend one brief mindfulness or breathing exercise in another short sentence.\n"
@@ -627,7 +627,67 @@ def api_chat():
 
 @app.route('/chat')
 def chat():
+    """
+    Renders chat.html, which contains a full-screen popup questionnaire.
+    Once the user completes the questions, it calls /generate_routine
+    and displays the plan on the same page.
+    """
     return render_template('chat.html')
+
+@app.route('/generate_routine', methods=['POST'])
+def generate_routine():
+    data = request.get_json()
+
+    # Construct a prompt that requests HTML formatting and includes all new data
+    prompt = (
+        "Please create a professional, HTML-formatted yoga & fitness plan report. "
+        "Use headings (<h3>) and bullet points (<ul><li>) for clarity. "
+        "Main Heading must be Client Summary"
+        "Make sure the report includes:\n\n"
+        "1. A short summary of the user's information (age, gender, height, weight, etc.).\n"
+        "2. A detailed diet plan with approximate calorie consumption, recommended macronutrient ratios, "
+        "   and suggested caloric intake based on the user's goals.\n"
+        "3. A workout routine laid out per day (like Day 1, Day 2...), with recommended yoga poses or exercises.\n"
+        "4. A conclusion discussing how long it might take to reach their set goal.\n\n"
+        "Here is the user data:\n"
+        f"- Age Range: {data.get('age_range')}\n"
+        f"- Gender: {data.get('gender')}\n"
+        f"- Height: {data.get('height')}\n"
+        f"- Weight: {data.get('weight')}\n"
+        f"- Primary Goal: {data.get('primary_goal')}\n"
+        f"- Fitness Level: {data.get('fitness_level')}\n"
+        f"- Activity Level: {data.get('activity_level')}\n"
+        f"- Current Eating Habits: {data.get('current_eating_habits')}\n"
+        f"- Eating Habit Goals: {data.get('eating_goals')}\n"
+        f"- Dietary Preferences/Restrictions: {data.get('dietary_restrictions')}\n"
+        f"- Weeks to Work on Routine: {data.get('weeks')}\n"
+        f"- Warm-up Preference: {data.get('warmup')}\n"
+        f"- Breathing Preference: {data.get('breathing')}\n"
+        f"- Current Workout Status: {data.get('workout_status')}\n"
+        f"- Desired Workout Duration: {data.get('workout_duration')}\n"
+        f"- Health Concerns/Injuries: {data.get('health_concerns')}\n\n"
+        "Include all relevant details in the final plan. Format everything nicely in HTML. Put client summary - Generate a concise and engaging summary of the user’s lifestyle and fitness journey in paragraph form (max 150 words). Avoid listing specific details; instead, infer what their information reveals about their habits, priorities, and challenges. The tone should be motivating yet neutral, acknowledging their current status while emphasizing their aspirations.- in paragraph."
+        "do NOT print triple back ticks. NEVER PRINT THEM it should not print '''html"
+    )
+    
+    try:
+        llm_model = genai.GenerativeModel('gemini-1.5-flash')
+        payload = {"parts": [{"text": prompt}]}
+        response = llm_model.generate_content(payload)
+        # If Gemini returns a text attribute, treat it as our HTML
+        detailed_html = response.text if hasattr(response, "text") else "No HTML plan generated."
+    except Exception as e:
+        print("Gemini error:", e)
+        detailed_html = (
+            "<p>We're sorry, but there was an error generating your plan at this time.</p>"
+        )
+
+    return jsonify({"routine": detailed_html})
+
+# ---------------------------
+# End of Endpoints
+# ---------------------------
+
 
 # ---------------------------
 # End of Endpoints

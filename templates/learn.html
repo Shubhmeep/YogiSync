@@ -33,13 +33,16 @@
     </div>
   </div>
 </nav>
+
+<!-- Banner Section -->
 <div class="container-fluid text-white p-3" style="background-color: #FFB3A7; padding-top: 50px; opacity: 60%;">
   <!-- Your banner content here -->
 </div>
+
 <!-- Main Container -->
 <div class="container my-5" style="padding-top: 10px;">
   <div class="row g-4 align-items-stretch">
-    <!-- Left Column: 8 out of 12 columns on large screens -->
+    <!-- Left Column: Video and Pose Info (8/12 columns on large screens) -->
     <div class="col-12 col-lg-7">
       <div class="card shadow h-100">
         <div class="card-body d-flex flex-column">
@@ -51,42 +54,59 @@
             {% elif pose_choice == 'raised' %}
               <iframe src="https://www.youtube.com/embed/dmTt3q2Bnaw?start=34&modestbranding=1&rel=0" 
                       title="Raised Hands Pose Tutorial" allowfullscreen></iframe>
+            {% elif pose_choice == 'plank' %}
+            <iframe src="https://www.youtube.com/embed/98FVbpHw8RU" 
+            title="Plank Pose Tutorial" allowfullscreen></iframe>
+            {% elif pose_choice == 'triangle' %}
+              <iframe src="https://www.youtube.com/embed/Cm3PEdNfgfQ" 
+                      title="Triangle Pose Tutorial" allowfullscreen></iframe>
+            {% elif pose_choice == 'chair' %}
+              <iframe src="https://www.youtube.com/embed/tIJp9ySBr1s" 
+                      title="Chair Pose Tutorial" allowfullscreen></iframe>
+            {% elif pose_choice == 'tree' %}
+              <iframe src="https://www.youtube.com/embed/WznvoO68sDw" 
+                      title="Tree Pose Tutorial" allowfullscreen></iframe>
             {% endif %}
           </div>
-          <!-- About the Pose + Beginner & 10 seconds -->
+          <!-- About the Pose Section -->
           <div class="d-flex justify-content-between align-items-center mb-2">
             <h4 class="mb-0">About the Pose</h4>
             <div class="d-flex align-items-center gap-3">
-              <!-- Beginner Badge -->
-              <div class="badge text-dark" 
-                   style="background-color: #BEDDF8; font-size: 1rem; padding: 0.5rem 1rem;">
-                Beginner
-              </div>
-              <!-- 10 seconds -->
-              <div class="text-secondary" style="font-size: 1rem;">
-                <i class="bi bi-clock me-1"></i> 10 seconds
-              </div>
+              <!-- Difficulty Badge (you may adjust per pose) -->
+              {% if pose_choice in ['warrior', 'raised', 'chair'] %}
+                <div class="badge text-dark" style="background-color: #BEDDF8; font-size: 1rem; padding: 0.5rem 1rem;">Beginner</div>
+              {% else %}
+                <div class="badge text-dark" style="background-color: #BEDDF8; font-size: 1rem; padding: 0.5rem 1rem;">Intermediate</div>
+              {% endif %}
+              <!-- Timer Text (example value) -->
+              {% if pose_choice in ['warrior', 'raised', 'chair'] %}
+                <div class="text-secondary" style="font-size: 1rem;"><i class="bi bi-clock me-1"></i> 10 seconds</div>
+              {% else %}
+                <div class="text-secondary" style="font-size: 1rem;"><i class="bi bi-clock me-1"></i> 15 seconds</div>
+              {% endif %}
             </div>
           </div>
           <!-- Short Description -->
           <div>
             {% if pose_choice == 'warrior' %}
-              <p>
-                Warrior Pose builds strength, stability, and balance while opening the hips and chest.
-                Focus on proper alignment and deep breathing for best results.
-              </p>
+              <p>Warrior Pose builds strength, stability, and balance while opening the hips and chest. Focus on proper alignment and deep breathing.</p>
             {% elif pose_choice == 'raised' %}
-              <p>
-                Raised Hands Pose stretches and energizes the front body, improving flexibility and posture.
-                Engage your core and breathe steadily to maximize benefits.
-              </p>
+              <p>Raised Hands Pose stretches and energizes the front body, improving flexibility and posture. Engage your core and breathe steadily.</p>
+            {% elif pose_choice == 'plank' %}
+              <p>Plank Pose strengthens your core, arms, and legs while improving overall stability. Keep your body in a straight line and maintain controlled, deep breaths.</p>
+            {% elif pose_choice == 'triangle' %}
+              <p>Triangle Pose increases flexibility and balance by stretching the legs and torso. Maintain a long spine and steady breathing for optimal benefit.</p>
+            {% elif pose_choice == 'chair' %}
+              <p>Chair Pose challenges your lower body and core, building strength and endurance. Imagine sitting on an invisible chair while keeping your chest lifted.</p>
+            {% elif pose_choice == 'tree' %}
+              <p>Tree Pose enhances balance and concentration. Ground one leg firmly while placing the other foot on your inner thigh and bring your hands together in prayer.</p>
             {% endif %}
           </div>
         </div>
       </div>
     </div>
     
-    <!-- Right Column: 4 out of 12 columns on large screens -->
+    <!-- Right Column: Tabbed Information (4/12 columns on large screens) -->
     <div class="col-12 col-lg-5">
       <div class="card shadow h-100">
         <div class="card-header">
@@ -108,24 +128,25 @@
             </li>
           </ul>
         </div>
-        
         <div class="card-body tab-content" id="learnTabContent">
-          <!-- Practice Tips Tab -->
+          <!-- Practice Tips Tab Content -->
           <div class="tab-pane fade show active" id="pose" role="tabpanel" aria-labelledby="pose-tab">
             <!-- Practice Instructions -->
             <div class="card mb-3">
               <div class="card-body">
                 <h5 class="card-title">Practice Instructions</h5>
                 {% if pose_choice == 'warrior' %}
-                  <p>
-                    To practice Warrior Pose effectively, ground your feet firmly, align your front knee over your ankle, and keep your back leg straight.
-                    Engage your core, relax your shoulders, and focus on deep, steady breathing.
-                  </p>
+                  <p>To practice Warrior Pose, ground your feet firmly, align your front knee over your ankle, and keep your back leg straight. Engage your core and breathe deeply.</p>
                 {% elif pose_choice == 'raised' %}
-                  <p>
-                    For Raised Hands Pose, begin with your feet hip-width apart. Slowly raise your arms overhead, elongate your spine, and engage your core.
-                    Maintain steady breathing and relaxed shoulders throughout the pose.
-                  </p>
+                  <p>For Raised Hands Pose, begin with your feet hip-width apart. Slowly raise your arms overhead, elongate your spine, and engage your core. Maintain steady, relaxed breathing.</p>
+                {% elif pose_choice == 'plank' %}
+                  <p>For Plank Pose, place your palms under your shoulders and extend your legs back, forming a straight line from head to heels. Engage your core and focus on controlled, deep breaths.</p>
+                {% elif pose_choice == 'triangle' %}
+                  <p>For Triangle Pose, start with your feet wide apart. Turn one foot outward, extend your arms, and lean over the front leg. Keep your spine long and breathe deeply.</p>
+                {% elif pose_choice == 'chair' %}
+                  <p>For Chair Pose, stand with your feet hip-width apart, then slide down as if sitting on an invisible chair. Keep your chest lifted, engage your core, and breathe steadily.</p>
+                {% elif pose_choice == 'tree' %}
+                  <p>For Tree Pose, shift your weight onto one leg and place the sole of your other foot on your inner thigh. Bring your hands to prayer position and focus on steady, controlled breathing.</p>
                 {% endif %}
               </div>
             </div>
@@ -137,13 +158,37 @@
                   <ul>
                     <li>Improves balance and stability</li>
                     <li>Strengthens legs and core</li>
-                    <li>Enhances concentration</li>
+                    <li>Enhances focus</li>
                   </ul>
                 {% elif pose_choice == 'raised' %}
                   <ul>
-                    <li>Improves posture</li>
-                    <li>Increases flexibility</li>
-                    <li>Boosts energy levels</li>
+                    <li>Improves posture and flexibility</li>
+                    <li>Energizes the body</li>
+                    <li>Stretches the chest</li>
+                  </ul>
+                {% elif pose_choice == 'plank' %}
+                  <ul>
+                    <li>Builds core strength</li>
+                    <li>Enhances upper body stability</li>
+                    <li>Improves overall posture</li>
+                  </ul>
+                {% elif pose_choice == 'triangle' %}
+                  <ul>
+                    <li>Increases flexibility in the legs and torso</li>
+                    <li>Enhances balance</li>
+                    <li>Stretches the side body</li>
+                  </ul>
+                {% elif pose_choice == 'chair' %}
+                  <ul>
+                    <li>Strengthens the lower body</li>
+                    <li>Improves core stability</li>
+                    <li>Boosts endurance</li>
+                  </ul>
+                {% elif pose_choice == 'tree' %}
+                  <ul>
+                    <li>Enhances balance and concentration</li>
+                    <li>Strengthens the standing leg</li>
+                    <li>Promotes mindfulness</li>
                   </ul>
                 {% endif %}
               </div>
@@ -155,12 +200,32 @@
                 {% if pose_choice == 'warrior' %}
                   <ul>
                     <li>Risk of knee strain if misaligned</li>
-                    <li>Requires careful form</li>
+                    <li>Requires focus on form</li>
                   </ul>
                 {% elif pose_choice == 'raised' %}
                   <ul>
                     <li>May strain shoulders if done improperly</li>
-                    <li>Not suitable for severe shoulder injuries</li>
+                    <li>Not advised for severe shoulder injuries</li>
+                  </ul>
+                {% elif pose_choice == 'plank' %}
+                  <ul>
+                    <li>Can cause lower back strain if form is poor</li>
+                    <li>Requires significant core strength</li>
+                  </ul>
+                {% elif pose_choice == 'triangle' %}
+                  <ul>
+                    <li>May cause discomfort in the hamstrings</li>
+                    <li>Requires flexibility and balance</li>
+                  </ul>
+                {% elif pose_choice == 'chair' %}
+                  <ul>
+                    <li>Can strain the knees if performed too deeply</li>
+                    <li>Requires good lower body strength</li>
+                  </ul>
+                {% elif pose_choice == 'tree' %}
+                  <ul>
+                    <li>May be challenging for beginners</li>
+                    <li>Requires focus and balance</li>
                   </ul>
                 {% endif %}
               </div>
@@ -242,8 +307,7 @@
                   <li>Focus on deep, relaxed breathing.</li>
                 </ul>
                 <div class="mt-3">
-                  <img src="https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" 
-                       class="img-fluid rounded" alt="Practice Setup" style="max-height:300px;">
+                  <img src="https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" class="img-fluid rounded" alt="Practice Setup" style="max-height:300px;">
                 </div>
                 <div class="text-center mt-3">
                   <a href="{{ url_for('video', pose_choice=pose_choice) }}" class="btn btn-primary" style="background-color: #FF917D; border-color: transparent;">Go to Live Practice</a>
