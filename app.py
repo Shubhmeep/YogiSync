@@ -148,7 +148,7 @@ def ensure_camera():
     """Ensure the camera is initialized and opened."""
     global camera
     if camera is None or not camera.isOpened():
-        camera = cv2.VideoCapture(0,cv2.CAP_V4L2)
+        camera = cv2.VideoCapture(0)
 
 # ---------------------------
 # Frame Generator Function
