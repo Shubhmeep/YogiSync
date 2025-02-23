@@ -105,11 +105,31 @@
           {% else %}
             <p>Please follow the on-screen instructions for the selected pose.</p>
           {% endif %}
+          {% set pose_images = {
+            'Warrior Pose': url_for('static', filename='warriorman.jpg'),
+            'Raised Hands Pose': url_for('static', filename='raised hands pose.jpeg'),
+            'Tree Pose': url_for('static', filename='Tree pose 1.jpg'),
+            'Chair Pose': url_for('static', filename='chair pose.jpg'),
+            'Plank Pose': url_for('static', filename='plank pose.jpg'),
+            'Triangle Pose': url_for('static', filename='Triangle pose.jpg')
+          } %}
+          
+          {# If your pose_choice is a slug (e.g., 'warrior') instead of the full pose name, create a mapping #}
+          {% set pose_mapping = {
+            'warrior': 'Warrior Pose',
+            'raised': 'Raised Hands Pose',
+            'plank': 'Plank Pose',
+            'triangle': 'Triangle Pose',
+            'chair': 'Chair Pose',
+            'tree': 'Tree Pose'
+          } %}
+          
           <!-- Additional Image (always shown) -->
           <div class="mt-4 p-3 border rounded shadow-sm">
-            <img src="https://imgs.search.brave.com/f41N5qvtbzeX4WV7p28RT6kGHGjk_dGGcwVKf-QuJFQ/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/ZnJlZS1waG90by93/YXJyaW9yLXR3by1w/b3NlXzExNjMtMTIy/OS5qcGc_c2VtdD1h/aXNfaHlicmlk" 
+            <img src="{{ pose_images[pose_mapping[pose_choice]] }}" 
                  alt="Pose Visual" class="img-fluid rounded">
           </div>
+          
         </div>
       </div>
     </div>

@@ -45,14 +45,24 @@
     {# Mapping from pose name to URL slug #}
     {% set pose_route = {
       'Warrior Pose': 'warrior',
-      'Raised Hands Pose': 'raised'
+      'Raised Hands Pose': 'raised',
+      'Tree Pose': 'tree',
+      'Chair Pose': 'chair',
+      'Plank Pose': 'plank',
+      'Triangle Pose': 'triangle',
+      
     } %}
     
     {# Mapping from pose name to a thumbnail image #}
     {% set pose_images = {
-      'Warrior Pose': 'https://images.pexels.com/photos/3756520/pexels-photo-3756520.jpeg?w=100&h=100&fit=crop',
-      'Raised Hands Pose': 'https://images.pexels.com/photos/3823039/pexels-photo-3823039.jpeg?w=100&h=100&fit=crop'
+      'Warrior Pose': url_for('static', filename='warriorman.jpg'),
+      'Raised Hands Pose': url_for('static', filename='raised hands pose.jpeg'),
+      'Tree Pose': url_for('static', filename='Tree pose 1.jpg'),
+      'Chair Pose': url_for('static', filename='chair pose.jpg'),
+      'Plank Pose': url_for('static', filename='plank pose.jpg'),
+      'Triangle Pose': url_for('static', filename='Triangle pose.jpg')
     } %}
+    
     
     <ul id="playlistList" class="list-unstyled">
       {% for pose in playlist %}
