@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% block title %}Practice - Yoga App{% endblock %}
+
+{% block content %}
+<!-- Include Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+
+<!-- Optional Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light" style="box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{ url_for('index') }}">
+      <img src="{{ url_for('static', filename='Screenshot (514).png') }}" 
+           alt="Yoga Logo" width="55" height="50" class="d-inline-block align-text-bottom">
+      <span style="color: #A3B290; font-weight: bold;">YogiSync</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ms-auto me-4">
+        <li class="nav-item"><a class="nav-link active" href="{{ url_for('index') }}">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('practice') }}">Workouts</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('show_playlist') }}">Playlist</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('chat') }}">AI-Coach</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid text-white p-3" style="background-color: #FFB3A7; padding-top: 50px; opacity: 60%;">
+  <!-- Your banner content here -->
+</div>
+<h1 class="text-center" style="padding-top: 40px;">Select Workout</h1>
+
+<div class="container py-1">
+  <div class="text-center mb-5">
+    <p class="lead">Learn or practice your favorite yoga pose!</p>
+  </div>
+
+  <!-- Row of Poses -->
+  <div class="row row-cols-1 row-cols-md-3 g-4">
+    <!-- Warrior Pose -->
+    <div class="col">
+      <div class="card h-100 shadow position-relative">
+        <button class="heart-btn" data-pose="Warrior Pose" 
+                style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; outline: none; z-index: 10;">
+          <i class="bi bi-heart-fill" style="font-size: 1.5rem; color: #ff6b81;"></i>
+        </button>
+        <img src="https://images.pexels.com/photos/3756520/pexels-photo-3756520.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260" 
+             class="card-img-top" alt="Warrior Pose" style="height: 250px; object-fit: cover;">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
+            <h5 class="card-title mb-0">Warrior Pose</h5>
+            <div class="d-flex align-items-center gap-3">
+              <span class="badge text-dark" style="background-color: #BEDDF8; font-size: 1rem; padding: 0.5rem 0.8rem; border-radius: 0.5rem;">Beginner</span>
+              <span class="text-secondary d-flex align-items-center" style="font-size:1rem;">
+                <i class="bi bi-clock me-1"></i> 10 seconds
+              </span>
+            </div>
+          </div>
+          <p class="card-text">Strengthen your legs, core, and arms while improving balance. This pose helps build focus and stability.</p>
+        </div>
+        <div class="card-footer d-flex justify-content-end py-3">
+          <a href="{{ url_for('learn', pose_choice='warrior') }}" class="btn btn-info me-2" style="background-color: #FF917D; border-color: transparent; color:white;">
+            Learn
+          </a>
+          <a href="{{ url_for('video', pose_choice='warrior') }}" class="btn btn-primary" style="background-color: #FF917D; border-color: transparent;">
+            Practice
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Raised Hands Pose -->
+    <div class="col">
+      <div class="card h-100 shadow position-relative">
+        <button class="heart-btn" data-pose="Raised Hands Pose" 
+                style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; outline: none; z-index: 10;">
+          <i class="bi bi-heart-fill" style="font-size: 1.5rem; color: #ff6b81;"></i>
+        </button>
+        <img src="https://images.pexels.com/photos/3823039/pexels-photo-3823039.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
+             class="card-img-top" alt="Raised Hands Pose" style="height: 250px; object-fit: cover;">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
+            <h5 class="card-title mb-0">Raised Hands Pose</h5>
+            <div class="d-flex align-items-center gap-3">
+              <span class="badge text-dark" style="background-color: #BEDDF8; font-size: 1rem; padding: 0.5rem 0.8rem; border-radius: 0.5rem;">Beginner</span>
+              <span class="text-secondary d-flex align-items-center" style="font-size:1rem;">
+                <i class="bi bi-clock me-1"></i> 10 seconds
+              </span>
+            </div>
+          </div>
+          <p class="card-text">Open up your shoulders and stretch your back with this rejuvenating pose. Perfect for a quick energy boost.</p>
+        </div>
+        <div class="card-footer d-flex justify-content-end py-3">
+          <a href="{{ url_for('learn', pose_choice='raised') }}" class="btn btn-info me-2" style="background-color: #FF917D; border-color: transparent; color:white;">
+            Learn
+          </a>
+          <a href="{{ url_for('video', pose_choice='raised') }}" class="btn btn-primary" style="background-color: #FF917D; border-color: transparent;">
+            Practice
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plank Pose -->
+    <div class="col">
+      <div class="card h-100 shadow position-relative">
+        <button class="heart-btn" data-pose="Plank Pose" 
+                style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; outline: none; z-index: 10;">
+          <i class="bi bi-heart-fill" style="font-size: 1.5rem; color: #ff6b81;"></i>
+        </button>
+        <img src="https://images.pexels.com/photos/414029/pexels-photo-414029.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
+             class="card-img-top" alt="Plank Pose" style="height: 250px; object-fit: cover;">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
+            <h5 class="card-title mb-0">Plank Pose</h5>
+            <div class="d-flex align-items-center gap-3">
+              <span class="badge text-dark" style="background-color: #BEDDF8; font-size: 1rem; padding: 0.5rem 0.8rem; border-radius: 0.5rem;">Intermediate</span>
+              <span class="text-secondary d-flex align-items-center" style="font-size:1rem;">
+                <i class="bi bi-clock me-1"></i> 15 seconds
+              </span>
+            </div>
+          </div>
+          <p class="card-text">Engage your core and build overall body strength. The plank improves endurance and stability.</p>
+        </div>
+        <div class="card-footer d-flex justify-content-end py-3">
+          <a href="{{ url_for('learn', pose_choice='plank') }}" class="btn btn-info me-2" style="background-color: #FF917D; border-color: transparent; color:white;">
+            Learn
+          </a>
+          <a href="{{ url_for('video', pose_choice='plank') }}" class="btn btn-primary" style="background-color: #FF917D; border-color: transparent;">
+            Practice
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Triangle Pose -->
+    <div class="col">
+      <div class="card h-100 shadow position-relative">
+        <button class="heart-btn" data-pose="Triangle Pose" 
+                style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; outline: none; z-index: 10;">
+          <i class="bi bi-heart-fill" style="font-size: 1.5rem; color: #ff6b81;"></i>
+        </button>
+        <img src="https://images.pexels.com/photos/4056723/pexels-photo-4056723.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
+             class="card-img-top" alt="Triangle Pose" style="height: 250px; object-fit: cover;">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
+            <h5 class="card-title mb-0">Triangle Pose</h5>
+            <div class="d-flex align-items-center gap-3">
+              <span class="badge text-dark" style="background-color: #BEDDF8; font-size: 1rem; padding: 0.5rem 0.8rem; border-radius: 0.5rem;">Intermediate</span>
+              <span class="text-secondary d-flex align-items-center" style="font-size:1rem;">
+                <i class="bi bi-clock me-1"></i> 15 seconds
+              </span>
+            </div>
+          </div>
+          <p class="card-text">Improve your flexibility and balance with this pose that stretches the legs and torso.</p>
+        </div>
+        <div class="card-footer d-flex justify-content-end py-3">
+          <a href="{{ url_for('learn', pose_choice='triangle') }}" class="btn btn-info me-2" style="background-color: #FF917D; border-color: transparent; color:white;">
+            Learn
+          </a>
+          <a href="{{ url_for('video', pose_choice='triangle') }}" class="btn btn-primary" style="background-color: #FF917D; border-color: transparent;">
+            Practice
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chair Pose -->
+    <div class="col">
+      <div class="card h-100 shadow position-relative">
+        <button class="heart-btn" data-pose="Chair Pose" 
+                style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; outline: none; z-index: 10;">
+          <i class="bi bi-heart-fill" style="font-size: 1.5rem; color: #ff6b81;"></i>
+        </button>
+        <img src="https://images.pexels.com/photos/4666758/pexels-photo-4666758.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
+             class="card-img-top" alt="Chair Pose" style="height: 250px; object-fit: cover;">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
+            <h5 class="card-title mb-0">Chair Pose</h5>
+            <div class="d-flex align-items-center gap-3">
+              <span class="badge text-dark" style="background-color: #BEDDF8; font-size: 1rem; padding: 0.5rem 0.8rem; border-radius: 0.5rem;">Intermediate</span>
+              <span class="text-secondary d-flex align-items-center" style="font-size:1rem;">
+                <i class="bi bi-clock me-1"></i> 15 seconds
+              </span>
+            </div>
+          </div>
+          <p class="card-text">Strengthen your thighs and core while improving balance and concentration.</p>
+        </div>
+        <div class="card-footer d-flex justify-content-end py-3">
+          <a href="{{ url_for('learn', pose_choice='chair') }}" class="btn btn-info me-2" style="background-color: #FF917D; border-color: transparent; color:white;">
+            Learn
+          </a>
+          <a href="{{ url_for('video', pose_choice='chair') }}" class="btn btn-primary" style="background-color: #FF917D; border-color: transparent;">
+            Practice
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tree Pose -->
+    <div class="col">
+      <div class="card h-100 shadow position-relative">
+        <button class="heart-btn" data-pose="Tree Pose" 
+                style="position: absolute; top: 10px; right: 10px; background: transparent; border: none; outline: none; z-index: 10;">
+          <i class="bi bi-heart-fill" style="font-size: 1.5rem; color: #ff6b81;"></i>
+        </button>
+        <img src="https://images.pexels.com/photos/4031851/pexels-photo-4031851.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
+             class="card-img-top" alt="Tree Pose" style="height: 250px; object-fit: cover;">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
+            <h5 class="card-title mb-0">Tree Pose</h5>
+            <div class="d-flex align-items-center gap-3">
+              <span class="badge text-dark" style="background-color: #BEDDF8; font-size: 1rem; padding: 0.5rem 0.8rem; border-radius: 0.5rem;">Intermediate</span>
+              <span class="text-secondary d-flex align-items-center" style="font-size:1rem;">
+                <i class="bi bi-clock me-1"></i> 15 seconds
+              </span>
+            </div>
+          </div>
+          <p class="card-text">Enhance your balance and focus by grounding through one leg while stretching the other upward.</p>
+        </div>
+        <div class="card-footer d-flex justify-content-end py-3">
+          <a href="{{ url_for('learn', pose_choice='tree') }}" class="btn btn-info me-2" style="background-color: #FF917D; border-color: transparent; color:white;">
+            Learn
+          </a>
+          <a href="{{ url_for('video', pose_choice='tree') }}" class="btn btn-primary" style="background-color: #FF917D; border-color: transparent;">
+            Practice
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<br>
+<br>
+<br>
+<div class="container-fluid text-white p-3" style="background-color: #FFB3A7; padding-top: 50px; opacity: 60%;">
+  <!-- Your banner content here -->
+</div>
+
+<!-- Chat Widget -->
+<div id="chatWidget">
+  <div id="chatIcon">&#128172;</div>
+  <div id="chatWindow">
+      <div id="chatWindowHeader">
+          Yoga Chat
+          <span id="closeChat">&times;</span>
+      </div>
+      <div id="chatWindowBody"></div>
+      <div id="chatWindowFooter">
+          <input type="text" id="chatInput" placeholder="Type your message...">
+          <button id="chatSend">Send</button>
+      </div>
+  </div>
+</div>
+
+{% endblock %}

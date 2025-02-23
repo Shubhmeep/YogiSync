@@ -1,6 +1,10 @@
-mediapipe
+Flask
 opencv-python
-pandas
-scikit-learn
-flask
-flask-socketio
+numpy
+mediapipe
+google-generativeai
+python-dotenv
+httpx
+pickle-mixin
+warnings
+base64

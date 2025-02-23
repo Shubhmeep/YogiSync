@@ -29,14 +29,16 @@ atexit.register(cleanup_threads)  # Register cleanup function
 
 warnings.filterwarnings('ignore')
 
-
 # Load environment variables (GOOGLE_API_KEY is needed for Gemini 1.5 Flash)
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-app = Flask(__name__)
+# Optionally, you can specify a static folder for assets
+app = Flask(__name__, static_folder='assets')
 
-# --- Global variables for pose processing ---
+# ---------------------------
+# Global variables and model
+# ---------------------------
 pose_info = {
     "pose_text": "No Pose Detected",
     "accuracy_text": "",
@@ -52,7 +54,9 @@ analysis_triggered_for_wrong = False
 wrong_pose_start_time = None
 DEBOUNCE_TIME = 1.5
 
-with open('yoga_v1.pkl', 'rb') as f:
+# Load your pose classification model. Adjust the file path as needed.
+model_path = os.getenv("MODEL_PATH", "yoga_v1.pkl")
+with open(model_path, 'rb') as f:
     model = pickle.load(f)
 
 mp_drawing = mp.solutions.drawing_utils
@@ -72,6 +76,9 @@ smoothing_factor = 0.7
 camera = None
 streaming_active = False
 
+# ---------------------------
+# Utility Functions
+# ---------------------------
 def preprocess_frame(frame):
     """Enhance the frame using CLAHE and gamma correction."""
     lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
@@ -137,20 +144,21 @@ def smooth_landmarks(new_landmarks):
         smoothed_landmarks = smoothing_factor * smoothed_landmarks + (1 - smoothing_factor) * new_coords
     return smoothed_landmarks
 
-
 def ensure_camera():
     """Ensure the camera is initialized and opened."""
     global camera
     if camera is None or not camera.isOpened():
         camera = cv2.VideoCapture(0)
 
-
+# ---------------------------
+# Frame Generator Function
+# ---------------------------
 def gen_frames(selected_pose):
     """
     Generator function that captures frames from the camera, processes them
     with pose detection, applies smoothing, and yields JPEG-encoded images.
-    The selected_pose parameter ('warrior' or 'raised') is used to check
-    only the relevant pose.
+    The selected_pose parameter (e.g., 'warrior', 'raised', 'plank', 'triangle', 'chair', or 'tree')
+    is used to determine which pose logic to apply.
     """
     global prev_time, pose_info, streaming_active, camera, tts_thread
     while streaming_active:
@@ -167,7 +175,7 @@ def gen_frames(selected_pose):
 
         results = pose.process(proc_frame_rgb)
 
-        skeleton_color = (0, 0, 255)  # Red = incorrect.
+        skeleton_color = (0, 0, 255)  # Default red color for incorrect pose.
         pose_text = "No Pose Detected"
         accuracy_text = ""
         correct = False
@@ -187,42 +195,11 @@ def gen_frames(selected_pose):
             right_knee_angle = compute_joint_angle_from_coords(coords, 24, 26, 28)
             left_arm_angle = compute_joint_angle_from_coords(coords, 23, 11, 13)
             right_arm_angle = compute_joint_angle_from_coords(coords, 24, 12, 14)
-            
             warrior_elbows_ok = (150 <= left_elbow_angle <= 190) and (150 <= right_elbow_angle <= 190)
-            warrior_knees_ok = ((110 <= left_knee_angle <= 150) and (150 <= right_knee_angle <= 190)) or \
-                               ((110 <= right_knee_angle <= 150) and (150 <= left_knee_angle <= 190))
+            warrior_knees_ok = (((110 <= left_knee_angle <= 150) and (150 <= right_knee_angle <= 190)) or
+                                ((110 <= right_knee_angle <= 150) and (150 <= left_knee_angle <= 190)))
             arms_alignment_ok = (80 <= left_arm_angle <= 100) and (80 <= right_arm_angle <= 100)
             warrior_pose = warrior_elbows_ok and warrior_knees_ok and arms_alignment_ok
-            
-            # Instructions logic for Warrior Pose
-            instructions = ""
-            if not warrior_elbows_ok:
-                if left_elbow_angle < 150 or left_elbow_angle > 190:
-                    instructions += "Straighten your left arm.\n"
-                elif right_elbow_angle < 150 or right_elbow_angle > 190:
-                    instructions += "Straighten your right arm.\n" 
-            if not warrior_knees_ok:
-                if left_knee_angle < 110 and (150 <= right_knee_angle <= 190):
-                    instructions += "Slightly straighten your left leg.\n"
-                elif left_knee_angle > 150 and (150 <= right_knee_angle <= 190):
-                    instructions += "Bend your left leg more.\n"
-                elif right_knee_angle < 110 and (150 <= left_knee_angle <= 190):
-                    instructions += "Slightly straighten your right leg.\n"
-                elif right_knee_angle > 150 and (150 <= left_knee_angle <= 190):
-                    instructions += "Bend your right leg more.\n"
-                if right_knee_angle < 150 and (110 <= left_knee_angle <= 150):
-                    instructions += "Straighten your right leg.\n"
-                elif left_knee_angle < 150 and (110 <= right_knee_angle <= 150):
-                    instructions += "Straighten your left leg.\n"
-            if not arms_alignment_ok:
-                if left_arm_angle < 80:
-                    instructions += "Move your left arm up.\n"
-                elif left_arm_angle > 100:
-                    instructions += "Move your left arm down.\n"
-                elif right_arm_angle < 80:
-                    instructions += "Move your right arm up.\n"
-                elif right_arm_angle > 100:
-                    instructions += "Move your right arm down.\n"
 
             # --- Raised Hands Pose Logic ---
             left_shoulder_angle = compute_joint_angle_from_coords(coords, 23, 11, 13)
@@ -233,18 +210,6 @@ def gen_frames(selected_pose):
             raised_hips_ok = (left_hip_angle < 180) and (right_hip_angle < 180)
             raised_hands_ok = (coords[15][1] < coords[11][1]) and (coords[16][1] < coords[12][1])
             raised_hands_pose = raised_shoulders_ok and raised_hips_ok and raised_hands_ok
-            
-            # Instructions logic for Raised Hands Pose
-            instructions = ""
-            if not raised_hands_ok:
-                if coords[15][1] >= coords[11][1] or coords[16][1] >= coords[12][1]:
-                    instructions += "Raise your hands higher.\n"
-            if not raised_shoulders_ok:
-                if left_shoulder_angle < 160 or right_shoulder_angle < 160:
-                    instructions += "Straighten your shoulders.\n"
-            if not raised_hips_ok:
-                if left_hip_angle >= 180 or right_hip_angle >= 180:
-                    instructions += "Move your hips back.\n"
 
             # --- Plank Pose Logic ---
             plank_left_elbow_angle = compute_joint_angle_from_coords(coords, 11, 13, 15)
@@ -255,17 +220,13 @@ def gen_frames(selected_pose):
             plank_right_hip_angle = compute_joint_angle_from_coords(coords, 12, 24, 26)
             plank_left_knee_angle = compute_joint_angle_from_coords(coords, 23, 25, 27)
             plank_right_knee_angle = compute_joint_angle_from_coords(coords, 24, 26, 28)
-
             plank_elbow_ok = (plank_left_elbow_angle >= 160) and (plank_right_elbow_angle >= 160)
             plank_shoulder_ok = (50 <= plank_left_shoulder_angle <= 100) and (50 <= plank_right_shoulder_angle <= 100)
             plank_hip_ok = (125 <= plank_left_hip_angle <= 195) and (125 <= plank_right_hip_angle <= 195)
             plank_knee_ok = (125 <= plank_left_knee_angle <= 195) and (125 <= plank_right_knee_angle <= 195)
             plank_pose = plank_elbow_ok and plank_shoulder_ok and plank_hip_ok and plank_knee_ok
 
-            # Instructions logic for Plank Pose
-            ####################################
-
-             # --- Triangle Pose Logic ---
+            # --- Triangle Pose Logic ---
             triangle_left_elbow = compute_joint_angle_from_coords(coords, 11, 13, 15)
             triangle_right_elbow = compute_joint_angle_from_coords(coords, 12, 14, 16)
             triangle_left_shoulder = compute_joint_angle_from_coords(coords, 13, 11, 23)
@@ -274,16 +235,15 @@ def gen_frames(selected_pose):
             triangle_right_hip = compute_joint_angle_from_coords(coords, 12, 24, 26)
             triangle_left_knee = compute_joint_angle_from_coords(coords, 23, 25, 27)
             triangle_right_knee = compute_joint_angle_from_coords(coords, 24, 26, 28)
-
-            triangle_elbows_ok = triangle_left_elbow >= 160 and triangle_right_elbow >= 160
+            triangle_elbows_ok = (triangle_left_elbow >= 160) and (triangle_right_elbow >= 160)
             triangle_shoulders_ok = ((70 <= triangle_left_shoulder <= 100 and 100 <= triangle_right_shoulder <= 160) or
                                      (70 <= triangle_right_shoulder <= 100 and 100 <= triangle_left_shoulder <= 160))
             triangle_hips_ok = ((130 <= triangle_left_hip <= 160 and 50 <= triangle_right_hip <= 90) or
                                 (130 <= triangle_right_hip <= 160 and 50 <= triangle_left_hip <= 90))
-            triangle_knees_ok = triangle_left_knee >= 160 and triangle_right_knee >= 160
+            triangle_knees_ok = (triangle_left_knee >= 160) and (triangle_right_knee >= 160)
             triangle_pose = triangle_elbows_ok and triangle_shoulders_ok and triangle_hips_ok and triangle_knees_ok
-            
-            #chair pose logic
+
+            # --- Chair Pose Logic ---
             chair_left_elbow = compute_joint_angle_from_coords(coords, 11, 13, 15)
             chair_right_elbow = compute_joint_angle_from_coords(coords, 12, 14, 16)
             chair_left_shoulder = compute_joint_angle_from_coords(coords, 13, 11, 23)
@@ -292,20 +252,17 @@ def gen_frames(selected_pose):
             chair_right_hip = compute_joint_angle_from_coords(coords, 12, 24, 26)
             chair_left_knee = compute_joint_angle_from_coords(coords, 23, 25, 27)
             chair_right_knee = compute_joint_angle_from_coords(coords, 24, 26, 28)
-            
-            chair_left_elbow_ok = (155 <= chair_left_elbow <= 190) 
+            chair_left_elbow_ok = (155 <= chair_left_elbow <= 190)
             chair_right_elbow_ok = (155 <= chair_right_elbow <= 190)
-            chair_left_hip_ok = (110 <= chair_left_hip <= 160) 
-            chair_right_hip_ok = (110 <= chair_right_hip <= 160) 
-            chair_left_knee_ok = (110 <= chair_left_knee <= 160) 
-            chair_right_knee_ok = (110 <= chair_right_knee <= 160) 
-            chair_left_shoulder_ok= (130 <= chair_left_shoulder <= 180)
-            chair_right_shoulder_ok= (130 <= chair_right_shoulder <= 180)
-        
-            chair_pose= (chair_left_elbow_ok and chair_right_elbow_ok) and (chair_left_hip_ok and chair_right_hip_ok) and (chair_left_knee_ok and chair_right_knee_ok) and (chair_left_shoulder_ok and chair_right_shoulder_ok)
+            chair_left_hip_ok = (110 <= chair_left_hip <= 160)
+            chair_right_hip_ok = (110 <= chair_right_hip <= 160)
+            chair_left_knee_ok = (110 <= chair_left_knee <= 160)
+            chair_right_knee_ok = (110 <= chair_right_knee <= 160)
+            chair_left_shoulder_ok = (130 <= chair_left_shoulder <= 180)
+            chair_right_shoulder_ok = (130 <= chair_right_shoulder <= 180)
+            chair_pose = (chair_left_elbow_ok and chair_right_elbow_ok) and (chair_left_hip_ok and chair_right_hip_ok) and (chair_left_knee_ok and chair_right_knee_ok) and (chair_left_shoulder_ok and chair_right_shoulder_ok)
 
-
-            #Tree pose logic
+            # --- Tree Pose Logic ---
             tree_left_elbow = compute_joint_angle_from_coords(coords, 11, 13, 15)
             tree_right_elbow = compute_joint_angle_from_coords(coords, 12, 14, 16)
             tree_left_shoulder = compute_joint_angle_from_coords(coords, 13, 11, 23)
@@ -314,14 +271,17 @@ def gen_frames(selected_pose):
             tree_right_hip = compute_joint_angle_from_coords(coords, 12, 24, 26)
             tree_left_knee = compute_joint_angle_from_coords(coords, 23, 25, 27)
             tree_right_knee = compute_joint_angle_from_coords(coords, 24, 26, 28)
-            
             tree_elbows_ok = (130 <= tree_left_elbow <= 180) and (130 <= tree_right_elbow <= 180)
             tree_shoulders_ok = (130 <= tree_left_shoulder <= 180) and (130 <= tree_right_shoulder <= 180)
-            tree_hips_ok = (90<= tree_left_hip <= 160 and 150<= tree_right_hip <= 180) or (90<= tree_right_hip <= 155 and 155<= tree_left_hip <= 180)
-            tree_knees_ok = (0 <= tree_left_knee <= 90 and 150 <= tree_right_knee <= 180) or (0 <= tree_right_knee <= 90 and 150 <= tree_left_knee <= 180)
+            tree_hips_ok = ((90 <= tree_left_hip <= 160 and 150 <= tree_right_hip <= 180) or
+                            (90 <= tree_right_hip <= 155 and 155 <= tree_left_hip <= 180))
+            tree_knees_ok = ((0 <= tree_left_knee <= 90 and 150 <= tree_right_knee <= 180) or
+                             (0 <= tree_right_knee <= 90 and 150 <= tree_left_knee <= 180))
             tree_pose = tree_elbows_ok and tree_shoulders_ok and tree_hips_ok and tree_knees_ok
 
-
+            # ---------------------------
+            # Pose Classification via ML Model
+            # ---------------------------
             landmarks_ml = extract_landmarks(results)
             features = np.array(landmarks_ml).reshape(1, -1)
 
@@ -331,14 +291,14 @@ def gen_frames(selected_pose):
                 probabilities = model.predict_proba(features)
                 max_prob = np.max(probabilities)
                 pred_class = model.classes_[np.argmax(probabilities)]
-
+                
+                # --- Determine final output based on selected pose ---
                 if selected_pose == "warrior":
                     if pred_class == "Warrior Pose" and warrior_pose:
                         pose_text = "Warrior Pose Detected (Correct)"
                         correct = True
                         skeleton_color = (0, 255, 0)
                         accuracy_text = f"Accuracy: {max_prob * 100:.1f}%"
-                        # Stop TTS if pose is correct
                         if tts_thread is not None and tts_thread.is_alive():
                             tts_thread.do_run = False
                             tts_thread = None
@@ -346,7 +306,6 @@ def gen_frames(selected_pose):
                         pose_text = "Incorrect Warrior Pose - Adjust Your Position"
                         correct = False
                         skeleton_color = (0, 0, 255)
-                        # Start TTS if not already running
                         if pose_info["correct"] and (tts_thread is None or not tts_thread.is_alive()):
                             def tts():
                                 t = threading.current_thread()
@@ -367,7 +326,6 @@ def gen_frames(selected_pose):
                         correct = True
                         skeleton_color = (0, 255, 0)
                         accuracy_text = f"Accuracy: {max_prob * 100:.1f}%"
-                        # Stop TTS if pose is correct
                         if tts_thread is not None and tts_thread.is_alive():
                             tts_thread.do_run = False
                             os.system("pkill -f say")
@@ -376,7 +334,6 @@ def gen_frames(selected_pose):
                         pose_text = "Incorrect Raised Hands Pose - Adjust Your Position"
                         correct = False
                         skeleton_color = (0, 0, 255)
-                        # Start TTS if not already running
                         if pose_info["correct"] and (tts_thread is None or not tts_thread.is_alive()):
                             def tts():
                                 t = threading.current_thread()
@@ -397,7 +354,6 @@ def gen_frames(selected_pose):
                         correct = True
                         skeleton_color = (0, 255, 0)
                         accuracy_text = f"Accuracy: {max_prob * 100:.1f}%"
-                        # Stop TTS if pose is correct
                         if tts_thread is not None and tts_thread.is_alive():
                             tts_thread.do_run = False
                             os.system("pkill -f say")
@@ -406,7 +362,6 @@ def gen_frames(selected_pose):
                         pose_text = "Incorrect Plank Pose - Adjust Your Position"
                         correct = False
                         skeleton_color = (0, 0, 255)
-                        # Start TTS if not already running
                         if pose_info["correct"] and (tts_thread is None or not tts_thread.is_alive()):
                             def tts():
                                 t = threading.current_thread()
@@ -427,7 +382,6 @@ def gen_frames(selected_pose):
                         correct = True
                         skeleton_color = (0, 255, 0)
                         accuracy_text = f"Accuracy: {max_prob * 100:.1f}%"
-                        # Stop TTS if pose is correct
                         if tts_thread is not None and tts_thread.is_alive():
                             tts_thread.do_run = False
                             os.system("pkill -f say")
@@ -436,7 +390,6 @@ def gen_frames(selected_pose):
                         pose_text = "Incorrect Triangle Pose - Adjust Your Position"
                         correct = False
                         skeleton_color = (0, 0, 255)
-                        # Start TTS if not already running
                         if pose_info["correct"] and (tts_thread is None or not tts_thread.is_alive()):
                             def tts():
                                 t = threading.current_thread()
@@ -457,7 +410,6 @@ def gen_frames(selected_pose):
                         correct = True
                         skeleton_color = (0, 255, 0)
                         accuracy_text = f"Accuracy: {max_prob * 100:.1f}%"
-                        # Stop TTS if pose is correct
                         if tts_thread is not None and tts_thread.is_alive():
                             tts_thread.do_run = False
                             os.system("pkill -f say")
@@ -466,7 +418,6 @@ def gen_frames(selected_pose):
                         pose_text = "Incorrect Chair Pose - Adjust Your Position"
                         correct = False
                         skeleton_color = (0, 0, 255)
-                        # Start TTS if not already running
                         if pose_info["correct"] and (tts_thread is None or not tts_thread.is_alive()):
                             def tts():
                                 t = threading.current_thread()
@@ -487,7 +438,6 @@ def gen_frames(selected_pose):
                         correct = True
                         skeleton_color = (0, 255, 0)
                         accuracy_text = f"Accuracy: {max_prob * 100:.1f}%"
-                        # Stop TTS if pose is correct
                         if tts_thread is not None and tts_thread.is_alive():
                             tts_thread.do_run = False
                             os.system("pkill -f say")
@@ -496,7 +446,6 @@ def gen_frames(selected_pose):
                         pose_text = "Incorrect Tree Pose - Adjust Your Position"
                         correct = False
                         skeleton_color = (0, 0, 255)
-                        # Start TTS if not already running
                         if pose_info["correct"] and (tts_thread is None or not tts_thread.is_alive()):
                             def tts():
                                 t = threading.current_thread()
@@ -511,8 +460,6 @@ def gen_frames(selected_pose):
                             tts_thread = threading.Thread(target=tts, daemon=True)
                             tts_thread.start()
 
-        
-            # If streaming stops, ensure TTS thread is stopped.
             if not streaming_active and tts_thread is not None and tts_thread.is_alive():
                 tts_thread.do_run = False
                 os.system("pkill -f say")
@@ -534,11 +481,9 @@ def gen_frames(selected_pose):
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 
-
 # ---------------------------
 # Original Endpoints
 # ---------------------------
-
 @app.route('/')
 def index():
     """Homepage with Practice button."""
@@ -588,8 +533,6 @@ def learn(pose_choice):
 # ---------------------------
 # Chat and Playlist Endpoints
 # ---------------------------
-
-# Global playlist list.
 playlist = []
 
 @app.route('/api/add_to_playlist', methods=['POST'])
@@ -622,7 +565,11 @@ def start_practice(pose_index):
         pose_name = playlist[pose_index]
         mapping = {
             "Warrior Pose": "warrior",
-            "Raised Hands Pose": "raised"
+            "Raised Hands Pose": "raised",
+            "Plank Pose": "plank",
+            "Triangle Pose": "triangle",
+            "Chair Pose": "chair",
+            "Tree Pose": "tree"
         }
         pose_choice = mapping.get(pose_name, pose_name.lower())
         return render_template('video.html', 
@@ -685,6 +632,5 @@ def chat():
 # ---------------------------
 # End of Endpoints
 # ---------------------------
-
 if __name__ == '__main__':
     app.run(debug=True)

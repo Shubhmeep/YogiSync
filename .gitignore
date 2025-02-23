@@ -13,6 +13,7 @@ ENV/
 .env.local
 .venv
 backend/venv/
+shubh/
 
 # Flask specific (if using instance folder)
 instance/
